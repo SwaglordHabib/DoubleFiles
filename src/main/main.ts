@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint global-require: off, no-console: off, promise/always-return: off */
 
 /**
@@ -11,11 +12,13 @@
 import 'core-js/stable';
 import 'regenerator-runtime/runtime';
 import path from 'path';
-import { app, BrowserWindow, shell, ipcMain } from 'electron';
+import { app, BrowserWindow, shell, ipcMain, dialog } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
-import MenuBuilder from './menu';
-import { resolveHtmlPath } from './util';
+import { MenuBuilder } from './menu';
+import { resolveHtmlPath } from './util/util';
+import { DirentPlus } from './DirentPlus';
+import { searchFolders } from './util/searchFolders';
 
 export default class AppUpdater {
   constructor() {
@@ -27,10 +30,27 @@ export default class AppUpdater {
 
 let mainWindow: BrowserWindow | null = null;
 
-ipcMain.on('ipc-example', async (event, arg) => {
-  const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
-  console.log(msgTemplate(arg));
-  event.reply('ipc-example', msgTemplate('pong'));
+ipcMain.on('app:folder-dialog-open', (): void => {
+  const folder: string[] | undefined = dialog.showOpenDialogSync(mainWindow!, {
+    properties: ['openDirectory'],
+  });
+  console.log('🚀 ~ file: main.ts ~ line 42 ~ ipcMain.on ~ folder', folder);
+  mainWindow?.webContents.send('selected-folder', folder);
+});
+
+ipcMain.on('app:scan-folder', (_, folder: string): void => {
+  console.log('🚀 ~ file: main.ts ~ line 55 ~ ipcMain.on ~ folder', folder);
+  const folders: string[] = [];
+  const files: DirentPlus[] = [];
+  searchFolders(folder, files, folders);
+  console.log('🚀 ~ file: main.ts ~ line 63 ~ ipcMain.on ~ files', files);
+
+  mainWindow?.webContents.send('scan-finshed', files);
+});
+
+ipcMain.on('app:open-folder', (_, file: string): void => {
+  console.log('🚀 ~ file: main.ts ~ line 74 ~ ipcMain.on ~ file', file);
+  shell.showItemInFolder(file.replaceAll('/', '\\'));
 });
 
 if (process.env.NODE_ENV === 'production') {

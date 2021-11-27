@@ -1,12 +1,18 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
-contextBridge.exposeInMainWorld('electron', {
+contextBridge.exposeInMainWorld('api', {
   ipcRenderer: {
-    myPing() {
-      ipcRenderer.send('ipc-example', 'ping');
+    openDialog() {
+      ipcRenderer.send('app:folder-dialog-open');
+    },
+    scanFolder(folder) {
+      ipcRenderer.send('app:scan-folder', folder);
+    },
+    openFolder(file) {
+      ipcRenderer.send('app:open-folder', file);
     },
     on(channel, func) {
-      const validChannels = ['ipc-example'];
+      const validChannels = ['ipc-example', 'selected-folder', 'scan-finshed'];
       if (validChannels.includes(channel)) {
         // Deliberately strip event as it includes `sender`
         ipcRenderer.on(channel, (event, ...args) => func(...args));

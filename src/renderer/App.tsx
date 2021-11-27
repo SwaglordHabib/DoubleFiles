@@ -1,49 +1,74 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable import/no-named-as-default-member */
+/* eslint-disable import/no-named-as-default */
+/* eslint-disable no-console */
+import { Toolbar } from '@mui/material';
+import { useState } from 'react';
 import { MemoryRouter as Router, Switch, Route } from 'react-router-dom';
-import icon from '../../assets/icon.svg';
+import { DirentPlus } from '../main/DirentPlus';
 import './App.css';
+import SiteHeader from './components/SiteHeader/SiteHeader';
+import { Api } from './Api';
+import { sortByName } from './util/sortByName';
+import { Dashboard } from './components/Dashboard/Dashboard';
+import { VerticalBox } from './components/Boxes/VerticalBox';
+import { HorizontalBox } from './components/Boxes/HorizontalBox';
 
-const Hello = () => {
+export const drawerWidth = 240;
+
+const ActualApp = () => {
+  const [tab] = useState('File search');
+  const [folder, setFolder] = useState('');
+  const [files, setFiles] = useState<DirentPlus[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+
+  const api = (window as any).api as Api;
+
+  const handleScan = () => {
+    setLoading(true);
+    api.ipcRenderer.scanFolder(folder);
+    api.ipcRenderer.on('scan-finshed', (scannedFiles: DirentPlus[]) => {
+      setFiles([...new Set(scannedFiles)].sort(sortByName));
+      setLoading(false);
+    });
+  };
+
+  const handleOpenFolder = () => {
+    api.ipcRenderer.openDialog();
+    api.ipcRenderer.on(
+      'selected-folder',
+      (selectedFolder: string[] | undefined) => {
+        if (selectedFolder) {
+          setFolder(selectedFolder[0]);
+        }
+      }
+    );
+  };
+
   return (
-    <div>
-      <div className="Hello">
-        <img width="200px" alt="icon" src={icon} />
-      </div>
-      <h1>electron-react-boilerplate</h1>
-      <div className="Hello">
-        <a
-          href="https://electron-react-boilerplate.js.org/"
-          target="_blank"
-          rel="noreferrer"
-        >
-          <button type="button">
-            <span role="img" aria-label="books">
-              📚
-            </span>
-            Read our docs
-          </button>
-        </a>
-        <a
-          href="https://github.com/sponsors/electron-react-boilerplate"
-          target="_blank"
-          rel="noreferrer"
-        >
-          <button type="button">
-            <span role="img" aria-label="books">
-              🙏
-            </span>
-            Donate
-          </button>
-        </a>
-      </div>
-    </div>
+    <>
+      <SiteHeader />
+      <HorizontalBox>
+        <VerticalBox>
+          <Toolbar />
+          <Dashboard
+            tab={tab}
+            files={files}
+            loading={loading}
+            handleScan={handleScan}
+            handleOpenFolder={handleOpenFolder}
+          />
+        </VerticalBox>
+      </HorizontalBox>
+    </>
   );
 };
 
-export default function App() {
+export function App() {
   return (
     <Router>
       <Switch>
-        <Route path="/" component={Hello} />
+        <Route path="/" component={ActualApp} />
       </Switch>
     </Router>
   );
