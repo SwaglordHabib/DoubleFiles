@@ -28,7 +28,7 @@ const ActualApp = () => {
     setLoading(true);
     api.ipcRenderer.scanFolder(folder);
     api.ipcRenderer.on('scan-finshed', (scannedFiles: DirentPlus[]) => {
-      setFiles([...new Set(scannedFiles)].sort(sortByName));
+      setFiles(scannedFiles.sort(sortByName));
       setLoading(false);
     });
   };
