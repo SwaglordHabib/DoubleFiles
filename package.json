@@ -31,7 +31,7 @@
   },
   "build": {
     "productName": "Double Files",
-    "appId": "sh.doublefiles",
+    "appId": "swaglordhabib.doublefiles",
     "asar": true,
     "asarUnpack": "**\\*.{node,dll}",
     "files": [
