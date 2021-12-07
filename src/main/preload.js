@@ -5,8 +5,8 @@ contextBridge.exposeInMainWorld('api', {
     openDialog() {
       ipcRenderer.send('app:folder-dialog-open');
     },
-    scanFolder(folder) {
-      ipcRenderer.send('app:scan-folder', folder);
+    async scanFolder(folder) {
+      return ipcRenderer.invoke('app:scan-folder', folder);
     },
     openFolder(file) {
       ipcRenderer.send('app:open-folder', file);

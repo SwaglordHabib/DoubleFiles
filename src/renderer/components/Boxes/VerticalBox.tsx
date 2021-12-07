@@ -1,6 +1,10 @@
 import { ReactElement } from 'react';
 
-export function VerticalBox({ children }: { children: ReactElement[] }) {
+export function VerticalBox({
+  children,
+}: {
+  children: ReactElement | ReactElement[];
+}) {
   return (
     <div
       style={{

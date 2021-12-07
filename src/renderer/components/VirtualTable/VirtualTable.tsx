@@ -54,7 +54,7 @@ const styles = (theme: Theme) =>
     },
   } as const);
 
-interface ColumnData {
+interface ColumnProps {
   dataKey: string;
   label: string;
   numeric?: boolean;
@@ -68,7 +68,7 @@ interface Row {
 }
 
 interface MuiVirtualizedTableProps extends WithStyles<typeof styles> {
-  columns: readonly ColumnData[];
+  columns: readonly ColumnProps[];
   headerHeight?: number;
   onRowClick?: () => void;
   rowCount: number;
@@ -192,32 +192,19 @@ const VirtualizedTable = withStyles(styles, { defaultTheme })(
   MuiVirtualizedTable
 );
 
-export function ReactVirtualizedTable({ rows }: { rows: any[] }) {
+export function ReactVirtualizedTable<T>({
+  rows,
+  columns,
+}: {
+  rows: T[];
+  columns: ColumnProps[];
+}) {
   return (
     <Paper style={{ height: '100%', width: '100%' }}>
       <VirtualizedTable
         rowCount={rows.length}
         rowGetter={({ index }) => rows[index]}
-        columns={[
-          {
-            width: 120,
-            label: 'Filename',
-            dataKey: 'name',
-            flexGrow: 1,
-          },
-          {
-            width: 220,
-            label: 'Last modified',
-            dataKey: 'lastModified',
-          },
-          {
-            width: 100,
-            label: 'Path',
-            dataKey: 'path',
-            flexGrow: 1,
-            type: 'path',
-          },
-        ]}
+        columns={columns}
       />
     </Paper>
   );

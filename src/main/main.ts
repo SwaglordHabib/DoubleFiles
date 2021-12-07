@@ -17,7 +17,7 @@ import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import { MenuBuilder } from './menu';
 import { resolveHtmlPath } from './util/util';
-import { DirentPlus } from './DirentPlus';
+import { DirentPlus } from './util/DirentPlus';
 import { searchFolders } from './util/searchFolders';
 
 export default class AppUpdater {
@@ -38,18 +38,17 @@ ipcMain.on('app:folder-dialog-open', (): void => {
   mainWindow?.webContents.send('selected-folder', folder);
 });
 
-ipcMain.on('app:scan-folder', (_, folder: string): void => {
-  console.log('🚀 ~ file: main.ts ~ line 55 ~ ipcMain.on ~ folder', folder);
-  const folders: string[] = [];
-  const files: DirentPlus[] = [];
-  searchFolders(folder, files, folders);
-  console.log('🚀 ~ file: main.ts ~ line 63 ~ ipcMain.on ~ files', files);
-
-  mainWindow?.webContents.send('scan-finshed', files);
+ipcMain.handle('app:scan-folder', (_, folder: string) => {
+  return new Promise<DirentPlus[]>((resolve) => {
+    resolve(
+      searchFolders(folder).then((data) => {
+        return (data as DirentPlus[]).filter((f) => f);
+      })
+    );
+  });
 });
 
 ipcMain.on('app:open-folder', (_, file: string): void => {
-  console.log('🚀 ~ file: main.ts ~ line 74 ~ ipcMain.on ~ file', file);
   shell.showItemInFolder(file.replaceAll('/', '\\'));
 });
 

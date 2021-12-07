@@ -1,14 +1,18 @@
-import { Button, CircularProgress, Paper, Typography } from '@mui/material';
+import { Button, Typography } from '@mui/material';
+import { useContext } from 'react';
+import { LoaderWithCircularProgess } from '../Loader/LoaderWithCircularProgess';
+import { FileContext } from '../providers/files';
+import BasicTabs from '../Tabs/BasicTabs';
 import { ReactVirtualizedTable } from '../VirtualTable/VirtualTable';
 import { DashboardProps } from './Dashboard.type';
 
 export function Dashboard({
   tab,
-  files,
   handleOpenFolder,
   handleScan,
-  loading,
 }: DashboardProps): JSX.Element {
+  const { all, nonUniqe } = useContext(FileContext);
+
   return (
     <div
       style={{
@@ -17,13 +21,7 @@ export function Dashboard({
         height: '100%',
       }}
     >
-      <Typography
-        variant="h5"
-        component="div"
-        sx={{
-          flexGrow: 1,
-        }}
-      >
+      <Typography variant="h5" component="div">
         {tab}
       </Typography>
       <div
@@ -51,21 +49,62 @@ export function Dashboard({
           Start scan
         </Button>
       </div>
-      {loading ? (
-        <Paper
-          style={{
-            height: '100%',
-            width: '100%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <CircularProgress />
-        </Paper>
-      ) : (
-        <ReactVirtualizedTable rows={files} />
-      )}
+      <BasicTabs>
+        <LoaderWithCircularProgess lodable={nonUniqe}>
+          {(nonUniqeFiles) => (
+            <ReactVirtualizedTable
+              rows={nonUniqeFiles}
+              columns={[
+                {
+                  width: 120,
+                  label: 'Filename',
+                  dataKey: 'name',
+                  flexGrow: 1,
+                },
+                {
+                  width: 220,
+                  label: 'Last modified',
+                  dataKey: 'lastModified',
+                },
+                {
+                  width: 100,
+                  label: 'Path',
+                  dataKey: 'path',
+                  flexGrow: 1,
+                  type: 'path',
+                },
+              ]}
+            />
+          )}
+        </LoaderWithCircularProgess>
+        <LoaderWithCircularProgess lodable={all}>
+          {(allFiles) => (
+            <ReactVirtualizedTable
+              rows={allFiles}
+              columns={[
+                {
+                  width: 120,
+                  label: 'Filename',
+                  dataKey: 'name',
+                  flexGrow: 1,
+                },
+                {
+                  width: 220,
+                  label: 'Last modified',
+                  dataKey: 'lastModified',
+                },
+                {
+                  width: 100,
+                  label: 'Path',
+                  dataKey: 'path',
+                  flexGrow: 1,
+                  type: 'path',
+                },
+              ]}
+            />
+          )}
+        </LoaderWithCircularProgess>
+      </BasicTabs>
     </div>
   );
 }
